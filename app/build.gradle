@@ -1,0 +1,81 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 21
+    buildToolsVersion "21.1.2"
+
+    defaultConfig {
+        applicationId "com.sebbia.ormbenchmark"
+        minSdkVersion 15
+        targetSdkVersion 21
+        versionCode 1
+        versionName "1.0"
+
+        ndk{
+            moduleName "NativeSQLite"
+            stl "stlport_static"
+            ldLibs "log"
+        }
+    }
+
+    /*productFlavors {
+        x86 {
+
+            ndk{
+                abiFilter "x86"
+            }
+            // this is the flavor part of the version code.
+            // It must be higher than the arm one for devices supporting
+            // both, as x86 is preferred.
+            versionCode = 3
+        }
+        arm {
+
+            ndk{
+                abiFilter "armeabi-v7a"
+            }
+            versionCode = 1
+        }
+        mips {
+
+            // It must be higher than the arm one for devices supporting
+            // both, as mips is preferred.
+            ndk{
+                abiFilter "mips"
+            }
+            versionCode = 2
+        }
+        fat {
+
+            versionCode = 0
+        }
+    }
+
+    // make per-variant version code
+    applicationVariants.all { variant ->
+        // get the version code of each flavor
+        def abiVersion = variant.productFlavors.get(0).versionCode
+
+        // set the composite code
+        variant.mergedFlavor.versionCode = abiVersion * 1000000 + defaultConfig.versionCode
+    }*/
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    sourceSets.main {
+        jniLibs.srcDir 'src/main/libs'
+        jni.srcDirs = [] //disable automatic ndk-build call
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:21.0.3'
+    compile 'com.android.support:support-v4:21.0.3'
+    compile 'com.github.bobroalexandr:GenericDao:0.0.18-SNAPSHOT'
+}

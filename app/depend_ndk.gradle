@@ -1,0 +1,36 @@
+// Build helper for projects that depends on a native library with a NDK part
+// Define the list of ndk library you depend on in project main file :
+//   ext.jniProjects = [project(':ndklib1')]
+//   apply from : 'depend_ndk.gradle'
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.0.0'
+    }
+}
+import com.android.build.gradle.tasks.PackageApplication
+
+// As a workaround, we create a new 'native-libs' folder in the current project and
+// copy all the .so we depend on into it
+def ndkLibsDir = new File(buildDir, 'native-libs')
+ndkLibsDir.mkdir()
+
+task copyDependingNativeLibs(type: Copy) {
+    // Doc for copy http://www.gradle.org/docs/current/dsl/org.gradle.api.tasks.Copy.html
+    println 'jniProjects ' + jniProjects
+    jniProjects.each {
+        from(new File(it.buildDir, 'native-libs')) {
+            include '**/*.so'
+        }
+    }
+    into ndkLibsDir
+}
+
+tasks.withType(PackageApplication) { pkgTask ->
+    pkgTask.jniFolders = new HashSet<File>()
+    pkgTask.jniFolders.add(ndkLibsDir)
+    pkgTask.dependsOn copyDependingNativeLibs
+}
